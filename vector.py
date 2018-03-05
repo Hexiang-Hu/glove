@@ -41,10 +41,19 @@ class Vector(object):
     self.cache(name, cache_path, url=url)
 
   def __getitem__(self, token):
-    if token in self.stoi:
+    if self.stoi.get(token, -1) != -1:
       return self.vectors[self.stoi[token]]
     else:
       return self.unk_init(torch.Tensor(1, self.dim))
+
+  def __len__(self):
+    return self.vectors.size(0)
+
+  def _get_index(self, token):
+    if self.stoi.get(token, -1) != -1:
+      return self.stoi.get(token)
+    else:
+      return self.stoi['<unk>']
 
   def _prepare(self, vocab):
     word2vec = torch.Tensor( len(vocab), self.dim )
@@ -56,8 +65,8 @@ class Vector(object):
     return word2vec
 
   def check(self, token):
-    if token in self.stoi:  return True
-    else:                   return False
+    if self.stoi.get(token, -1) != -1:  return True
+    else:                               return False
 
   def cache(self, name, cache_path, url=None):
     path = osp.join(cache_path, name)
